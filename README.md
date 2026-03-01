@@ -1,16 +1,34 @@
-# React + Vite
+# 📝 Todo Master
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive, and user-friendly Todo application built with **React** and **Tailwind CSS**.  
+Todo Master helps users stay organized by managing tasks with due dates, edit functionality, and persistent local storage.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- ✅ Add new tasks with name and due date  
+- 🗓️ Date & time picker support  
+- ✏️ Edit existing tasks  
+- 🗑️ Delete tasks with confirmation  
+- 📌 Smart task status indicators:
+  - Overdue
+  - Today
+  - Tomorrow
+  - Upcoming
+- 💾 Data persistence using `localStorage`
+- 📱 Fully responsive design (mobile & desktop)
+- 🎨 Clean modern UI with gradients and animations
 
-The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **React (Hooks)**
+  - `useState`
+  - `useEffect`
+- **Tailwind CSS**
+- **JavaScript (ES6+)**
+- **Local Storage API**
+
+---
