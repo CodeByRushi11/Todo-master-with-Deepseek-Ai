@@ -1,28 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="description" content="TaskFlow Pro - A beautifully smart workspace for managing tasks that matter. Features deadline tracking, priorities, categories, and powerful organization tools." />
-    <meta name="keywords" content="todo, task management, productivity, deadline tracking, taskflow" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="TaskFlow Pro - A beautifully smart workspace for managing tasks that matter. Features deadline tracking, priorities, categories, and powerful organization tools."
+    />
+    <meta
+      name="keywords"
+      content="todo, task management, productivity, deadline tracking, taskflow"
+    />
     <meta name="author" content="TaskFlow" />
     <meta name="robots" content="index, follow" />
-    
+
     <!-- Open Graph -->
     <meta property="og:title" content="TaskFlow Pro — Smart Todo Manager" />
-    <meta property="og:description" content="A beautifully smart workspace for tasks that matter. Organize, prioritize, and accomplish your goals." />
+    <meta
+      property="og:description"
+      content="A beautifully smart workspace for tasks that matter. Organize, prioritize, and accomplish your goals."
+    />
     <meta property="og:type" content="website" />
-    
+
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300d4aa'/%3E%3Cstop offset='100%25' stop-color='%2300b899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Cpath d='M25 50l18 18 32-32' stroke='url(%23g)' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='72' cy='28' r='8' fill='%23f59e0b'/%3E%3C/svg%3E" />
-    
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300d4aa'/%3E%3Cstop offset='100%25' stop-color='%2300b899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Cpath d='M25 50l18 18 32-32' stroke='url(%23g)' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='72' cy='28' r='8' fill='%23f59e0b'/%3E%3C/svg%3E"
+    />
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
     <title>TaskFlow Pro — Smart Todo Manager</title>
-    
+
     <style>
       /* Critical CSS for fast first paint */
       body {
@@ -38,6 +57,7 @@
         justify-content: center;
         background: #080c14;
         z-index: 9999;
+        transition: opacity 0.4s;
       }
       .app-loading-spinner {
         width: 48px;
@@ -45,10 +65,12 @@
         border: 3px solid rgba(0, 212, 170, 0.2);
         border-top-color: #00d4aa;
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: spin 0.9s linear infinite;
       }
       @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
