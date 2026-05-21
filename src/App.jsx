@@ -60,11 +60,10 @@ const App = () => {
   const audioCtxRef = useRef(null);
 
   const playSound = useCallback(
-    (type) => {
+    async (type) => {
       if (!soundEnabled) return;
 
       try {
-        // Create only once
         if (!audioCtxRef.current) {
           audioCtxRef.current = new (
             window.AudioContext || window.webkitAudioContext
@@ -73,9 +72,9 @@ const App = () => {
 
         const ctx = audioCtxRef.current;
 
-        // Resume if browser suspended it
+        // ✅ AWAIT the resume — this is the critical fix
         if (ctx.state === "suspended") {
-          ctx.resume();
+          await ctx.resume();
         }
 
         const osc = ctx.createOscillator();
@@ -445,6 +444,10 @@ const App = () => {
 
   const confirmDelete = useCallback(() => {
     const task = tasks.find((t) => t.id === deleteTaskId);
+
+    // ✅ Call playSound HERE — directly inside the click handler
+    if (task) playSound("delete");
+
     setRemovingId(deleteTaskId);
     setTimeout(() => {
       setTasks((prev) => prev.filter((t) => t.id !== deleteTaskId));
@@ -453,7 +456,7 @@ const App = () => {
       setRemovingId(null);
       if (task) {
         showNotification("Deleted", `"${task.name}" removed.`, "danger");
-        playSound("delete");
+        // ❌ Remove playSound("delete") from here
       }
     }, 300);
   }, [deleteTaskId, tasks, showNotification, playSound]);
@@ -556,7 +559,22 @@ const App = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [closeModal, openModal]);
-
+  // Unlock AudioContext on first user interaction (required for Safari + HTTPS)
+  useEffect(() => {
+    const unlock = () => {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
+      }
+      if (audioCtxRef.current.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+      document.removeEventListener("click", unlock);
+    };
+    document.addEventListener("click", unlock);
+    return () => document.removeEventListener("click", unlock);
+  }, []);
   // Close context menu on outside click
   useEffect(() => {
     const handle = () => setActiveContextMenu(null);
