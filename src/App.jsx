@@ -57,15 +57,33 @@ const App = () => {
   }, []);
 
   // ── Sound ──────────────────────────────────────────────────────────────────
+  const audioCtxRef = useRef(null);
+
   const playSound = useCallback(
     (type) => {
       if (!soundEnabled) return;
+
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        // Create only once
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+        }
+
+        const ctx = audioCtxRef.current;
+
+        // Resume if browser suspended it
+        if (ctx.state === "suspended") {
+          ctx.resume();
+        }
+
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
+
         osc.connect(gain);
         gain.connect(ctx.destination);
+
         if (type === "success") {
           osc.frequency.setValueAtTime(800, ctx.currentTime);
           osc.frequency.exponentialRampToValueAtTime(
@@ -74,7 +92,7 @@ const App = () => {
           );
           gain.gain.setValueAtTime(0.08, ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-          osc.start(ctx.currentTime);
+          osc.start();
           osc.stop(ctx.currentTime + 0.2);
         } else if (type === "delete") {
           osc.frequency.setValueAtTime(600, ctx.currentTime);
@@ -84,24 +102,15 @@ const App = () => {
           );
           gain.gain.setValueAtTime(0.08, ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 0.3);
-        } else if (type === "notification") {
-          osc.frequency.setValueAtTime(600, ctx.currentTime);
-          osc.frequency.setValueAtTime(800, ctx.currentTime + 0.1);
-          osc.frequency.setValueAtTime(1000, ctx.currentTime + 0.2);
-          gain.gain.setValueAtTime(0.06, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-          osc.start(ctx.currentTime);
+          osc.start();
           osc.stop(ctx.currentTime + 0.3);
         }
-      } catch {
-        /* audio not supported */
+      } catch (err) {
+        console.log("Audio failed:", err);
       }
     },
     [soundEnabled],
   );
-
   // ── Notifications ──────────────────────────────────────────────────────────
   const showNotification = useCallback(
     (title, text, type = "success") => {
