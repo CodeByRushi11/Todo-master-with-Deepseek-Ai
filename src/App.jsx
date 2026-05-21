@@ -59,6 +59,37 @@ const App = () => {
   // ── Sound ──────────────────────────────────────────────────────────────────
   const audioCtxRef = useRef(null);
 
+  // FIX: Unlock AudioContext on FIRST user click anywhere on the page.
+  // On HTTPS (Netlify), browsers create AudioContext in "suspended" state.
+  // We must resume() it synchronously inside a real user gesture.
+  useEffect(() => {
+    const unlock = async () => {
+      try {
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+        }
+        if (audioCtxRef.current.state === "suspended") {
+          await audioCtxRef.current.resume();
+        }
+      } catch (e) {
+        // silently ignore
+      }
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("touchend", unlock);
+    };
+    document.addEventListener("click", unlock);
+    document.addEventListener("touchend", unlock);
+    return () => {
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("touchend", unlock);
+    };
+  }, []);
+
+  // FIX: playSound is now async — it awaits ctx.resume() before playing.
+  // Without await, on HTTPS the context may still be suspended when we try
+  // to schedule oscillator notes, causing silent failure.
   const playSound = useCallback(
     async (type) => {
       if (!soundEnabled) return;
@@ -72,7 +103,8 @@ const App = () => {
 
         const ctx = audioCtxRef.current;
 
-        // ✅ AWAIT the resume — this is the critical fix
+        // FIX: await the resume so audio nodes are scheduled only after
+        // the context is actually running (critical on Chrome/Safari HTTPS)
         if (ctx.state === "suspended") {
           await ctx.resume();
         }
@@ -110,18 +142,17 @@ const App = () => {
     },
     [soundEnabled],
   );
+
   // ── Notifications ──────────────────────────────────────────────────────────
-  const showNotification = useCallback(
-    (title, text, type = "success") => {
-      playSound("notification");
-      const id = Date.now() + Math.random();
-      setNotifications((prev) => [...prev, { id, title, text, type }]);
-      setTimeout(() => {
-        setNotifications((prev) => prev.filter((n) => n.id !== id));
-      }, 5000);
-    },
-    [playSound],
-  );
+  const showNotification = useCallback((title, text, type = "success") => {
+    // NOTE: removed playSound("notification") here — "notification" type
+    // was never handled in playSound so it played nothing anyway
+    const id = Date.now() + Math.random();
+    setNotifications((prev) => [...prev, { id, title, text, type }]);
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    }, 5000);
+  }, []);
 
   const dismissNotification = useCallback((id) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -401,6 +432,8 @@ const App = () => {
         setTasks((prev) => [...prev, newTask]);
         showNotification("Created!", `"${formData.name}" added.`, "success");
       }
+      // FIX: playSound is called directly inside the click/submit handler (synchronous
+      // user gesture context), so AudioContext is allowed to play on HTTPS
       playSound("success");
       closeModal();
     },
@@ -430,6 +463,7 @@ const App = () => {
           `"${task.name}" marked as complete.`,
           "success",
         );
+        // FIX: called directly in click handler — works on HTTPS
         playSound("success");
       }
     },
@@ -445,8 +479,13 @@ const App = () => {
   const confirmDelete = useCallback(() => {
     const task = tasks.find((t) => t.id === deleteTaskId);
 
-    // ✅ Call playSound HERE — directly inside the click handler
-    if (task) playSound("delete");
+    // FIX: playSound("delete") is now called HERE — directly inside the
+    // button click handler — NOT inside the setTimeout below.
+    // On Netlify (HTTPS), browsers block Web Audio that runs inside
+    // setTimeout because it's no longer in a synchronous user-gesture stack.
+    if (task) {
+      playSound("delete");
+    }
 
     setRemovingId(deleteTaskId);
     setTimeout(() => {
@@ -456,7 +495,7 @@ const App = () => {
       setRemovingId(null);
       if (task) {
         showNotification("Deleted", `"${task.name}" removed.`, "danger");
-        // ❌ Remove playSound("delete") from here
+        // playSound removed from here — moved above
       }
     }, 300);
   }, [deleteTaskId, tasks, showNotification, playSound]);
@@ -559,22 +598,7 @@ const App = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [closeModal, openModal]);
-  // Unlock AudioContext on first user interaction (required for Safari + HTTPS)
-  useEffect(() => {
-    const unlock = () => {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (
-          window.AudioContext || window.webkitAudioContext
-        )();
-      }
-      if (audioCtxRef.current.state === "suspended") {
-        audioCtxRef.current.resume();
-      }
-      document.removeEventListener("click", unlock);
-    };
-    document.addEventListener("click", unlock);
-    return () => document.removeEventListener("click", unlock);
-  }, []);
+
   // Close context menu on outside click
   useEffect(() => {
     const handle = () => setActiveContextMenu(null);
